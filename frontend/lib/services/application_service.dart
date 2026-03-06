@@ -8,7 +8,9 @@ class ApplicationService {
 
   Future<List<Application>> getApplications() async {
     final response = await _apiService.get('/applications');
-    return (response as List).map((e) => Application.fromJson(e as Map<String, dynamic>)).toList();
+    return (response as List)
+        .map((e) => Application.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<void> autoApply(int jobId) async {
@@ -16,6 +18,7 @@ class ApplicationService {
   }
 
   Future<void> applyManual(int jobId, {String? coverLetter}) async {
-    await _apiService.post('/applications/apply', body: {'job_id': jobId, 'cover_letter': coverLetter});
+    await _apiService.post('/applications/apply',
+        body: {'job_id': jobId, 'cover_letter': coverLetter});
   }
 }

@@ -42,42 +42,49 @@ class ApiService {
   Future<dynamic> get(String path,
       {Map<String, String>? query, bool auth = true}) async {
     try {
-      final response = await http.get(_uri(path, query),
-          headers: await _headers(auth: auth));
+      final response = await http
+          .get(_uri(path, query), headers: await _headers(auth: auth))
+          .timeout(
+            const Duration(seconds: 15),
+          );
       return _handleResponse(response);
     } catch (_) {
       throw Exception(
-          'Network error: unable to reach backend at ${AppConfig.baseUrl}.');
+          'Network error: unable to reach backend at ${AppConfig.baseUrl}. Make sure backend server is running.');
     }
   }
 
   Future<dynamic> post(String path,
       {Map<String, dynamic>? body, bool auth = true}) async {
     try {
-      final response = await http.post(
-        _uri(path),
-        headers: await _headers(auth: auth),
-        body: jsonEncode(body ?? {}),
-      );
+      final response = await http
+          .post(
+            _uri(path),
+            headers: await _headers(auth: auth),
+            body: jsonEncode(body ?? {}),
+          )
+          .timeout(const Duration(seconds: 15));
       return _handleResponse(response);
     } catch (_) {
       throw Exception(
-          'Network error: unable to reach backend at ${AppConfig.baseUrl}.');
+          'Network error: unable to reach backend at ${AppConfig.baseUrl}. Make sure backend server is running.');
     }
   }
 
   Future<dynamic> put(String path,
       {Map<String, dynamic>? body, bool auth = true}) async {
     try {
-      final response = await http.put(
-        _uri(path),
-        headers: await _headers(auth: auth),
-        body: jsonEncode(body ?? {}),
-      );
+      final response = await http
+          .put(
+            _uri(path),
+            headers: await _headers(auth: auth),
+            body: jsonEncode(body ?? {}),
+          )
+          .timeout(const Duration(seconds: 15));
       return _handleResponse(response);
     } catch (_) {
       throw Exception(
-          'Network error: unable to reach backend at ${AppConfig.baseUrl}.');
+          'Network error: unable to reach backend at ${AppConfig.baseUrl}. Make sure backend server is running.');
     }
   }
 
@@ -101,7 +108,7 @@ class ApiService {
       return _handleResponse(response);
     } catch (_) {
       throw Exception(
-          'Network error: unable to reach backend at ${AppConfig.baseUrl}.');
+          'Network error: unable to reach backend at ${AppConfig.baseUrl}. Make sure backend server is running.');
     }
   }
 

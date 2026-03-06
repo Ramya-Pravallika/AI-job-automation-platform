@@ -57,8 +57,12 @@ class User {
     return User(
       id: json['id'] as int,
       email: json['email'] as String,
-      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) : null,
-      profile: json['profile'] != null ? UserProfile.fromJson(json['profile']) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'])
+          : null,
+      profile: json['profile'] != null
+          ? UserProfile.fromJson(json['profile'])
+          : null,
     );
   }
 }

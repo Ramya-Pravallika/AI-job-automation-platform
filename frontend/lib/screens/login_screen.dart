@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../config/app_config.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_layout.dart';
 import '../widgets/error_widget.dart';
@@ -116,7 +117,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 180),
@@ -131,9 +133,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           'Login',
                           key: ValueKey('login-text'),
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                 ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'API: ${AppConfig.baseUrl}',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.outline,
+                fontSize: 12,
               ),
             ),
           ],
@@ -142,4 +154,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

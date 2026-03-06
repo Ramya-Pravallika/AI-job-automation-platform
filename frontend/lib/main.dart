@@ -23,9 +23,12 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider(AuthService(apiService))),
-        ChangeNotifierProvider(create: (_) => JobProvider(JobService(apiService))),
-        ChangeNotifierProvider(create: (_) => ApplicationProvider(ApplicationService(apiService))),
+        ChangeNotifierProvider(
+            create: (_) => AuthProvider(AuthService(apiService))),
+        ChangeNotifierProvider(
+            create: (_) => JobProvider(JobService(apiService))),
+        ChangeNotifierProvider(
+            create: (_) => ApplicationProvider(ApplicationService(apiService))),
         Provider(create: (_) => apiService),
       ],
       child: const JobAutomationApp(),
@@ -38,10 +41,52 @@ class JobAutomationApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const primary = Color(0xFF0F766E);
+    const secondary = Color(0xFFEA580C);
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: primary,
+      primary: primary,
+      secondary: secondary,
+      brightness: Brightness.light,
+    );
+
     return MaterialApp(
       title: 'AI Job Automation',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: colorScheme,
+        scaffoldBackgroundColor: const Color(0xFFF6FAFC),
+        appBarTheme: const AppBarTheme(
+          centerTitle: false,
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+        ),
+        cardTheme: CardThemeData(
+          elevation: 0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: colorScheme.outlineVariant),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: colorScheme.outlineVariant),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: colorScheme.primary, width: 1.6),
+          ),
+        ),
+      ),
       home: const AppGate(),
       routes: {
         LoginScreen.route: (_) => const LoginScreen(),
@@ -86,7 +131,8 @@ class _AppGateState extends State<AppGate> {
       future: _init,
       builder: (_, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
         final isAuthenticated = context.watch<AuthProvider>().isAuthenticated;
         return isAuthenticated ? const DashboardScreen() : const LoginScreen();

@@ -11,7 +11,10 @@ from app.database import get_db
 from app.models.user import User
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256", "bcrypt"],
+    deprecated="auto",
+)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 

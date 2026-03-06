@@ -25,9 +25,9 @@ class AuthLayout extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF0EA5E9),
-                  Color(0xFF4F46E5),
-                  Color(0xFF1E293B)
+                  Color(0xFF0F766E),
+                  Color(0xFF14B8A6),
+                  Color(0xFF0B3D3A)
                 ],
               ),
             ),
@@ -36,13 +36,14 @@ class AuthLayout extends StatelessWidget {
             top: -80,
             right: -40,
             child: _blurOrb(
-                color: Colors.white.withValues(alpha: 0.18), size: 220),
+                color: Colors.white.withValues(alpha: 0.16), size: 220),
           ),
           Positioned(
             bottom: -100,
             left: -20,
             child: _blurOrb(
-                color: Colors.cyanAccent.withValues(alpha: 0.14), size: 260),
+                color: const Color(0xFFFFEDD5).withValues(alpha: 0.3),
+                size: 260),
           ),
           SafeArea(
             child: Center(
@@ -76,7 +77,7 @@ class AuthLayout extends StatelessWidget {
                                 gradient: const LinearGradient(
                                   colors: [
                                     Color(0xFF2563EB),
-                                    Color(0xFF4F46E5)
+                                    Color(0xFF14B8A6)
                                   ],
                                 ),
                               ),

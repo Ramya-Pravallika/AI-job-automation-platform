@@ -29,7 +29,8 @@ class AuthService {
     return User.fromJson(response as Map<String, dynamic>);
   }
 
-  Future<UserProfile> saveProfile(UserProfile profile, {required bool isUpdate}) async {
+  Future<UserProfile> saveProfile(UserProfile profile,
+      {required bool isUpdate}) async {
     final response = isUpdate
         ? await _apiService.put('/users/profile', body: profile.toJson())
         : await _apiService.post('/users/profile', body: profile.toJson());

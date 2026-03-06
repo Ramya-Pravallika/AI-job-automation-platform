@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../config/app_config.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_layout.dart';
 import '../widgets/error_widget.dart';
@@ -88,9 +89,11 @@ class _SignupScreenState extends State<SignupScreen> {
                 suffixIcon: IconButton(
                   onPressed: () =>
                       setState(() => _obscurePassword = !_obscurePassword),
-                  icon: Icon(_obscurePassword
-                      ? Icons.visibility_rounded
-                      : Icons.visibility_off_rounded),
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_rounded
+                        : Icons.visibility_off_rounded,
+                  ),
                 ),
                 border: const OutlineInputBorder(),
               ),
@@ -114,9 +117,11 @@ class _SignupScreenState extends State<SignupScreen> {
                 suffixIcon: IconButton(
                   onPressed: () =>
                       setState(() => _obscureConfirm = !_obscureConfirm),
-                  icon: Icon(_obscureConfirm
-                      ? Icons.visibility_rounded
-                      : Icons.visibility_off_rounded),
+                  icon: Icon(
+                    _obscureConfirm
+                        ? Icons.visibility_rounded
+                        : Icons.visibility_off_rounded,
+                  ),
                 ),
                 border: const OutlineInputBorder(),
               ),
@@ -140,7 +145,8 @@ class _SignupScreenState extends State<SignupScreen> {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 180),
@@ -155,9 +161,19 @@ class _SignupScreenState extends State<SignupScreen> {
                           'Create Account',
                           key: ValueKey('signup-text'),
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                 ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'API: ${AppConfig.baseUrl}',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.outline,
+                fontSize: 12,
               ),
             ),
           ],
@@ -166,4 +182,3 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 }
-

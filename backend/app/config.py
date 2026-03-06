@@ -26,6 +26,13 @@ class Settings:
         "DATABASE_URL",
         "postgresql+psycopg2://postgres:postgres@localhost:5432/job_automation",
     )
+    DATABASE_FALLBACK_TO_SQLITE: bool = _to_bool(
+        os.getenv("DATABASE_FALLBACK_TO_SQLITE", "true")
+    )
+    SQLITE_FALLBACK_URL: str = os.getenv(
+        "SQLITE_FALLBACK_URL",
+        "sqlite:///./job_automation_local.db",
+    )
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "change-this-secret-in-production")
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
     JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "60"))

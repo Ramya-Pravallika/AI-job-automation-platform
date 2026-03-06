@@ -18,6 +18,7 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
   bool _loading = false;
 
   Future<void> _pickAndUpload() async {
+    final api = context.read<ApiService>();
     setState(() {
       _loading = true;
       _status = null;
@@ -41,7 +42,6 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
         return;
       }
 
-      final api = context.read<ApiService>();
       await api.uploadFile(
         path: '/resume/upload',
         field: 'file',

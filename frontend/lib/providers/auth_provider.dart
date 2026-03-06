@@ -19,6 +19,7 @@ class AuthProvider extends ChangeNotifier {
       try {
         user = await _authService.getMe();
       } catch (_) {
+        await _authService.logout();
         isAuthenticated = false;
       }
     }
@@ -36,7 +37,7 @@ class AuthProvider extends ChangeNotifier {
       isAuthenticated = true;
       return true;
     } catch (e) {
-      error = e.toString();
+      error = _cleanErrorMessage(e);
       return false;
     } finally {
       isLoading = false;
@@ -55,7 +56,7 @@ class AuthProvider extends ChangeNotifier {
       isAuthenticated = true;
       return true;
     } catch (e) {
-      error = e.toString();
+      error = _cleanErrorMessage(e);
       return false;
     } finally {
       isLoading = false;
@@ -72,7 +73,7 @@ class AuthProvider extends ChangeNotifier {
       user = await _authService.getMe();
       return true;
     } catch (e) {
-      error = e.toString();
+      error = _cleanErrorMessage(e);
       return false;
     } finally {
       isLoading = false;
@@ -85,5 +86,13 @@ class AuthProvider extends ChangeNotifier {
     user = null;
     isAuthenticated = false;
     notifyListeners();
+  }
+
+  String _cleanErrorMessage(Object error) {
+    final raw = error.toString();
+    if (raw.startsWith('Exception: ')) {
+      return raw.substring('Exception: '.length);
+    }
+    return raw;
   }
 }

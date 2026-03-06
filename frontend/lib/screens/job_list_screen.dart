@@ -18,16 +18,37 @@ class JobListScreen extends StatefulWidget {
 
 class _JobListScreenState extends State<JobListScreen> {
   final _queryController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _sourceController = TextEditingController();
+
+  Future<void> _loadJobs() async {
+    await context.read<JobProvider>().loadJobs(
+          query: _queryController.text.trim().isEmpty
+              ? null
+              : _queryController.text.trim(),
+          location: _locationController.text.trim().isEmpty
+              ? null
+              : _locationController.text.trim(),
+          source: _sourceController.text.trim().isEmpty
+              ? null
+              : _sourceController.text.trim(),
+        );
+  }
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<JobProvider>().loadJobs());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _loadJobs();
+    });
   }
 
   @override
   void dispose() {
     _queryController.dispose();
+    _locationController.dispose();
+    _sourceController.dispose();
     super.dispose();
   }
 
@@ -38,20 +59,56 @@ class _JobListScreenState extends State<JobListScreen> {
       appBar: AppBar(title: const Text('Jobs')),
       body: Column(
         children: [
-          Padding(
+          Container(
+            margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.all(12),
-            child: Row(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant),
+            ),
+            child: Column(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _queryController,
-                    decoration: const InputDecoration(hintText: 'Search jobs (python, backend...)'),
+                TextField(
+                  controller: _queryController,
+                  decoration: const InputDecoration(
+                    hintText: 'Search by role (python, backend...)',
+                    prefixIcon: Icon(Icons.search_rounded),
                   ),
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () => context.read<JobProvider>().loadJobs(query: _queryController.text.trim()),
-                  child: const Text('Search'),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _locationController,
+                        decoration: const InputDecoration(
+                          hintText: 'Location',
+                          prefixIcon: Icon(Icons.location_on_outlined),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _sourceController,
+                        decoration: const InputDecoration(
+                          hintText: 'Source (lever, greenhouse...)',
+                          prefixIcon: Icon(Icons.source_outlined),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _loadJobs,
+                    icon: const Icon(Icons.tune_rounded),
+                    label: const Text('Apply Filters'),
+                  ),
                 ),
               ],
             ),
@@ -70,7 +127,9 @@ class _JobListScreenState extends State<JobListScreen> {
                   final job = provider.jobs[index];
                   return JobCard(
                     job: job,
-                    onTap: () => Navigator.pushNamed(context, JobDetailScreen.route, arguments: job),
+                    onTap: () => Navigator.pushNamed(
+                        context, JobDetailScreen.route,
+                        arguments: job),
                   );
                 },
               ),

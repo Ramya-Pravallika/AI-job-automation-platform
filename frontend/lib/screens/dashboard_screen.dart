@@ -22,13 +22,17 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  Future<void> _loadData() async {
+    final jobProvider = context.read<JobProvider>();
+    final applicationProvider = context.read<ApplicationProvider>();
+    await jobProvider.loadMatchedJobs();
+    await applicationProvider.loadApplications();
+  }
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async {
-      await context.read<JobProvider>().loadMatchedJobs();
-      await context.read<ApplicationProvider>().loadApplications();
-    });
+    Future.microtask(_loadData);
   }
 
   @override
@@ -39,54 +43,108 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dashboard - ${user?.email ?? ''}'),
+        title: Text(
+          'Welcome, ${user?.email.split('@').first ?? 'User'}',
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
         actions: [
           IconButton(
             onPressed: () async {
-              await context.read<AuthProvider>().logout();
+              final authProvider = context.read<AuthProvider>();
+              final navigator = Navigator.of(context);
+              await authProvider.logout();
               if (!mounted) return;
-              Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+              navigator.pushNamedAndRemoveUntil('/login', (_) => false);
             },
             icon: const Icon(Icons.logout),
           )
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () async {
-          await jobProvider.loadMatchedJobs();
-          await applicationProvider.loadApplications();
-        },
+        onRefresh: _loadData,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0F766E), Color(0xFF14B8A6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x220F766E),
+                    blurRadius: 16,
+                    offset: Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: const Row(
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: Colors.white24,
+                    child:
+                        Icon(Icons.work_history_rounded, color: Colors.white),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Track jobs, generate AI docs, and apply faster.',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
             Wrap(
               spacing: 8,
+              runSpacing: 8,
               children: [
-                ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, JobListScreen.route),
-                  child: const Text('All Jobs'),
+                FilledButton.tonalIcon(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, JobListScreen.route),
+                  icon: const Icon(Icons.search_rounded),
+                  label: const Text('All Jobs'),
                 ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, ApplicationsScreen.route),
-                  child: const Text('Applications'),
+                FilledButton.tonalIcon(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, ApplicationsScreen.route),
+                  icon: const Icon(Icons.check_circle_outline_rounded),
+                  label: const Text('Applications'),
                 ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, ProfileScreen.route),
-                  child: const Text('Profile'),
+                FilledButton.tonalIcon(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, ProfileScreen.route),
+                  icon: const Icon(Icons.person_outline_rounded),
+                  label: const Text('Profile'),
                 ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, ResumeUploadScreen.route),
-                  child: const Text('Upload Resume'),
+                FilledButton.tonalIcon(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, ResumeUploadScreen.route),
+                  icon: const Icon(Icons.upload_file_rounded),
+                  label: const Text('Upload Resume'),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            const Text('Matched Jobs', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Matched Jobs',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             if (jobProvider.isLoading) const LoadingIndicator(),
             ...jobProvider.matchedJobs.take(5).map(
                   (job) => JobCard(
                     job: job,
-                    onTap: () => Navigator.pushNamed(context, JobDetailScreen.route, arguments: job),
+                    onTap: () => Navigator.pushNamed(
+                        context, JobDetailScreen.route,
+                        arguments: job),
                   ),
                 ),
             const SizedBox(height: 16),
@@ -96,10 +154,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 8),
             ...applicationProvider.applications.take(5).map(
-                  (a) => ListTile(
-                    title: Text(a.job?.title ?? 'Job #${a.jobId}'),
-                    subtitle: Text(a.job?.company ?? ''),
-                    trailing: Text(a.status),
+                  (a) => Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.assignment_turned_in_outlined),
+                      title: Text(a.job?.title ?? 'Job #${a.jobId}'),
+                      subtitle: Text(a.job?.company ?? ''),
+                      trailing: Text(
+                        a.status,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
           ],

@@ -26,7 +26,9 @@ class Application {
       jobId: json['job_id'] as int,
       status: json['status'] as String,
       coverLetter: json['cover_letter'] as String?,
-      appliedAt: json['applied_at'] != null ? DateTime.tryParse(json['applied_at']) : null,
+      appliedAt: json['applied_at'] != null
+          ? DateTime.tryParse(json['applied_at'])
+          : null,
       job: json['job'] != null ? Job.fromJson(json['job']) : null,
     );
   }

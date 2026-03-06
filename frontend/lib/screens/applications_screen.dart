@@ -18,7 +18,10 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<ApplicationProvider>().loadApplications());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<ApplicationProvider>().loadApplications();
+    });
   }
 
   @override
@@ -31,13 +34,36 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
           : provider.error != null
               ? ErrorMessage(message: provider.error!)
               : ListView.builder(
+                  padding: const EdgeInsets.all(12),
                   itemCount: provider.applications.length,
                   itemBuilder: (_, index) {
                     final app = provider.applications[index];
-                    return ListTile(
-                      title: Text(app.job?.title ?? 'Job #${app.jobId}'),
-                      subtitle: Text(app.job?.company ?? ''),
-                      trailing: Text(app.status),
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      child: ListTile(
+                        leading: const Icon(Icons.assignment_turned_in_rounded),
+                        title: Text(app.job?.title ?? 'Job #${app.jobId}'),
+                        subtitle: Text(app.job?.company ?? ''),
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color:
+                                Theme.of(context).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            app.status,
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
                     );
                   },
                 ),

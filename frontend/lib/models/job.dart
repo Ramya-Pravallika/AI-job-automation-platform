@@ -33,7 +33,9 @@ class Job {
       salary: json['salary'] as String?,
       source: json['source'] as String?,
       applyUrl: json['apply_url'] as String?,
-      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'])
+          : null,
       matchScore: (json['match_score'] as num?)?.toDouble(),
     );
   }

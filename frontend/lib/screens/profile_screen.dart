@@ -52,7 +52,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final ok = await provider.saveProfile(profile);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? 'Profile saved' : (provider.error ?? 'Failed'))),
+      SnackBar(
+          content: Text(ok ? 'Profile saved' : (provider.error ?? 'Failed'))),
     );
   }
 
@@ -65,14 +66,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            TextField(controller: _skillsController, decoration: const InputDecoration(labelText: 'Skills')),
+            TextField(
+                controller: _skillsController,
+                decoration: const InputDecoration(labelText: 'Skills')),
             const SizedBox(height: 12),
             TextField(
               controller: _experienceController,
               decoration: const InputDecoration(labelText: 'Experience'),
             ),
             const SizedBox(height: 12),
-            TextField(controller: _locationController, decoration: const InputDecoration(labelText: 'Location')),
+            TextField(
+                controller: _locationController,
+                decoration: const InputDecoration(labelText: 'Location')),
             const SizedBox(height: 12),
             TextField(
               controller: _preferredRolesController,
@@ -80,7 +85,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 16),
             if (auth.error != null) ErrorMessage(message: auth.error!),
-            ElevatedButton(onPressed: auth.isLoading ? null : _save, child: const Text('Save Profile')),
+            ElevatedButton(
+                onPressed: auth.isLoading ? null : _save,
+                child: const Text('Save Profile')),
           ],
         ),
       ),

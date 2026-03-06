@@ -13,12 +13,14 @@ class JobProvider extends ChangeNotifier {
   bool isLoading = false;
   String? error;
 
-  Future<void> loadJobs({String? query, String? location, String? source}) async {
+  Future<void> loadJobs(
+      {String? query, String? location, String? source}) async {
     isLoading = true;
     error = null;
     notifyListeners();
     try {
-      jobs = await _jobService.getJobs(query: query, location: location, source: source);
+      jobs = await _jobService.getJobs(
+          query: query, location: location, source: source);
     } catch (e) {
       error = e.toString();
     } finally {
