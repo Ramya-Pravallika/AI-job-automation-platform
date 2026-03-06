@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -7,9 +8,14 @@ import '../config/app_config.dart';
 
 class ApiService {
   ApiService({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+      : _storage = storage ?? const FlutterSecureStorage(),
+        _baseUrl = AppConfig.baseUrl;
 
   final FlutterSecureStorage _storage;
+  String _baseUrl;
+  bool _backendChecked = false;
+
+  String get currentBaseUrl => _baseUrl;
 
   Future<void> saveToken(String token) async {
     await _storage.write(key: 'jwt_token', value: token);
@@ -23,9 +29,35 @@ class ApiService {
     await _storage.delete(key: 'jwt_token');
   }
 
+  Future<void> ensureBackendReachable({bool force = false}) async {
+    if (_backendChecked && !force) {
+      return;
+    }
+
+    final candidates = AppConfig.candidateBaseUrls.toSet().toList();
+    for (final candidate in candidates) {
+      final healthUri = Uri.parse('$candidate/health');
+      try {
+        final response =
+            await http.get(healthUri).timeout(const Duration(seconds: 3));
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          _baseUrl = candidate;
+          _backendChecked = true;
+          return;
+        }
+      } on TimeoutException {
+        continue;
+      } on http.ClientException {
+        continue;
+      }
+    }
+
+    _baseUrl = AppConfig.baseUrl;
+    _backendChecked = true;
+  }
+
   Uri _uri(String path, [Map<String, String>? query]) {
-    return Uri.parse('${AppConfig.baseUrl}$path')
-        .replace(queryParameters: query);
+    return Uri.parse('$_baseUrl$path').replace(queryParameters: query);
   }
 
   Future<Map<String, String>> _headers({bool auth = true}) async {
@@ -41,6 +73,7 @@ class ApiService {
 
   Future<dynamic> get(String path,
       {Map<String, String>? query, bool auth = true}) async {
+    await ensureBackendReachable();
     try {
       final response = await http
           .get(_uri(path, query), headers: await _headers(auth: auth))
@@ -48,14 +81,19 @@ class ApiService {
             const Duration(seconds: 15),
           );
       return _handleResponse(response);
-    } catch (_) {
+    } on TimeoutException {
+      throw Exception('Network timeout: backend at $_baseUrl did not respond.');
+    } on http.ClientException {
       throw Exception(
-          'Network error: unable to reach backend at ${AppConfig.baseUrl}. Make sure backend server is running.');
+          'Network error: unable to reach backend at $_baseUrl. Make sure backend server is running.');
+    } catch (e) {
+      rethrow;
     }
   }
 
   Future<dynamic> post(String path,
       {Map<String, dynamic>? body, bool auth = true}) async {
+    await ensureBackendReachable();
     try {
       final response = await http
           .post(
@@ -65,14 +103,19 @@ class ApiService {
           )
           .timeout(const Duration(seconds: 15));
       return _handleResponse(response);
-    } catch (_) {
+    } on TimeoutException {
+      throw Exception('Network timeout: backend at $_baseUrl did not respond.');
+    } on http.ClientException {
       throw Exception(
-          'Network error: unable to reach backend at ${AppConfig.baseUrl}. Make sure backend server is running.');
+          'Network error: unable to reach backend at $_baseUrl. Make sure backend server is running.');
+    } catch (e) {
+      rethrow;
     }
   }
 
   Future<dynamic> put(String path,
       {Map<String, dynamic>? body, bool auth = true}) async {
+    await ensureBackendReachable();
     try {
       final response = await http
           .put(
@@ -82,9 +125,13 @@ class ApiService {
           )
           .timeout(const Duration(seconds: 15));
       return _handleResponse(response);
-    } catch (_) {
+    } on TimeoutException {
+      throw Exception('Network timeout: backend at $_baseUrl did not respond.');
+    } on http.ClientException {
       throw Exception(
-          'Network error: unable to reach backend at ${AppConfig.baseUrl}. Make sure backend server is running.');
+          'Network error: unable to reach backend at $_baseUrl. Make sure backend server is running.');
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -94,6 +141,7 @@ class ApiService {
     required List<int> bytes,
     required String filename,
   }) async {
+    await ensureBackendReachable();
     try {
       final request = http.MultipartRequest('POST', _uri(path));
       final token = await getToken();
@@ -106,9 +154,13 @@ class ApiService {
       final streamed = await request.send();
       final response = await http.Response.fromStream(streamed);
       return _handleResponse(response);
-    } catch (_) {
+    } on TimeoutException {
+      throw Exception('Network timeout: backend at $_baseUrl did not respond.');
+    } on http.ClientException {
       throw Exception(
-          'Network error: unable to reach backend at ${AppConfig.baseUrl}. Make sure backend server is running.');
+          'Network error: unable to reach backend at $_baseUrl. Make sure backend server is running.');
+    } catch (e) {
+      rethrow;
     }
   }
 

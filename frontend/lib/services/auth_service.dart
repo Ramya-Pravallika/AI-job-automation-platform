@@ -7,6 +7,7 @@ class AuthService {
   final ApiService _apiService;
 
   Future<void> signup(String email, String password) async {
+    await _apiService.ensureBackendReachable();
     final response = await _apiService.post(
       '/auth/signup',
       auth: false,
@@ -16,6 +17,7 @@ class AuthService {
   }
 
   Future<void> login(String email, String password) async {
+    await _apiService.ensureBackendReachable();
     final response = await _apiService.post(
       '/auth/login',
       auth: false,
@@ -25,6 +27,7 @@ class AuthService {
   }
 
   Future<User> getMe() async {
+    await _apiService.ensureBackendReachable();
     final response = await _apiService.get('/users/me');
     return User.fromJson(response as Map<String, dynamic>);
   }

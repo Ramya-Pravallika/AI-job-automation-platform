@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../config/app_config.dart';
 import '../providers/auth_provider.dart';
+import '../services/api_service.dart';
 import '../widgets/auth_layout.dart';
 import '../widgets/error_widget.dart';
 import 'dashboard_screen.dart';
@@ -49,6 +49,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final apiBaseUrl = context.read<ApiService>().currentBaseUrl;
 
     return AuthLayout(
       title: 'Create Account',
@@ -170,7 +171,7 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              'API: ${AppConfig.baseUrl}',
+              'API: $apiBaseUrl',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.outline,
                 fontSize: 12,

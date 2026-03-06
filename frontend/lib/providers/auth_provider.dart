@@ -93,6 +93,9 @@ class AuthProvider extends ChangeNotifier {
     if (raw.startsWith('Exception: ')) {
       return raw.substring('Exception: '.length);
     }
+    if (raw.startsWith('ClientException: ')) {
+      return raw.substring('ClientException: '.length);
+    }
     return raw;
   }
 }
