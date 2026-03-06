@@ -24,7 +24,8 @@ class ApiService {
   }
 
   Uri _uri(String path, [Map<String, String>? query]) {
-    return Uri.parse('${AppConfig.baseUrl}$path').replace(queryParameters: query);
+    return Uri.parse('${AppConfig.baseUrl}$path')
+        .replace(queryParameters: query);
   }
 
   Future<Map<String, String>> _headers({bool auth = true}) async {
@@ -38,27 +39,46 @@ class ApiService {
     return headers;
   }
 
-  Future<dynamic> get(String path, {Map<String, String>? query, bool auth = true}) async {
-    final response = await http.get(_uri(path, query), headers: await _headers(auth: auth));
-    return _handleResponse(response);
+  Future<dynamic> get(String path,
+      {Map<String, String>? query, bool auth = true}) async {
+    try {
+      final response = await http.get(_uri(path, query),
+          headers: await _headers(auth: auth));
+      return _handleResponse(response);
+    } catch (_) {
+      throw Exception(
+          'Network error: unable to reach backend at ${AppConfig.baseUrl}.');
+    }
   }
 
-  Future<dynamic> post(String path, {Map<String, dynamic>? body, bool auth = true}) async {
-    final response = await http.post(
-      _uri(path),
-      headers: await _headers(auth: auth),
-      body: jsonEncode(body ?? {}),
-    );
-    return _handleResponse(response);
+  Future<dynamic> post(String path,
+      {Map<String, dynamic>? body, bool auth = true}) async {
+    try {
+      final response = await http.post(
+        _uri(path),
+        headers: await _headers(auth: auth),
+        body: jsonEncode(body ?? {}),
+      );
+      return _handleResponse(response);
+    } catch (_) {
+      throw Exception(
+          'Network error: unable to reach backend at ${AppConfig.baseUrl}.');
+    }
   }
 
-  Future<dynamic> put(String path, {Map<String, dynamic>? body, bool auth = true}) async {
-    final response = await http.put(
-      _uri(path),
-      headers: await _headers(auth: auth),
-      body: jsonEncode(body ?? {}),
-    );
-    return _handleResponse(response);
+  Future<dynamic> put(String path,
+      {Map<String, dynamic>? body, bool auth = true}) async {
+    try {
+      final response = await http.put(
+        _uri(path),
+        headers: await _headers(auth: auth),
+        body: jsonEncode(body ?? {}),
+      );
+      return _handleResponse(response);
+    } catch (_) {
+      throw Exception(
+          'Network error: unable to reach backend at ${AppConfig.baseUrl}.');
+    }
   }
 
   Future<dynamic> uploadFile({
@@ -67,16 +87,22 @@ class ApiService {
     required List<int> bytes,
     required String filename,
   }) async {
-    final request = http.MultipartRequest('POST', _uri(path));
-    final token = await getToken();
-    if (token != null && token.isNotEmpty) {
-      request.headers['Authorization'] = 'Bearer $token';
-    }
-    request.files.add(http.MultipartFile.fromBytes(field, bytes, filename: filename));
+    try {
+      final request = http.MultipartRequest('POST', _uri(path));
+      final token = await getToken();
+      if (token != null && token.isNotEmpty) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+      request.files
+          .add(http.MultipartFile.fromBytes(field, bytes, filename: filename));
 
-    final streamed = await request.send();
-    final response = await http.Response.fromStream(streamed);
-    return _handleResponse(response);
+      final streamed = await request.send();
+      final response = await http.Response.fromStream(streamed);
+      return _handleResponse(response);
+    } catch (_) {
+      throw Exception(
+          'Network error: unable to reach backend at ${AppConfig.baseUrl}.');
+    }
   }
 
   dynamic _handleResponse(http.Response response) {
@@ -84,7 +110,9 @@ class ApiService {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return body;
     }
-    final message = body is Map<String, dynamic> ? (body['detail'] ?? 'Request failed') : 'Request failed';
+    final message = body is Map<String, dynamic>
+        ? (body['detail'] ?? 'Request failed')
+        : 'Request failed';
     throw Exception(message.toString());
   }
 }

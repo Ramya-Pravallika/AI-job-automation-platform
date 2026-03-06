@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../widgets/auth_layout.dart';
 import '../widgets/error_widget.dart';
-import '../widgets/loading_indicator.dart';
 import 'dashboard_screen.dart';
 import 'signup_screen.dart';
 
@@ -17,8 +17,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -28,8 +30,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     final provider = context.read<AuthProvider>();
-    final ok = await provider.login(_emailController.text.trim(), _passwordController.text);
+    final ok = await provider.login(
+        _emailController.text.trim(), _passwordController.text);
     if (!mounted) return;
     if (ok) {
       Navigator.pushReplacementNamed(context, DashboardScreen.route);
@@ -39,30 +46,100 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+
+    return AuthLayout(
+      title: 'Welcome Back',
+      subtitle: 'Sign in to continue your AI job automation journey.',
+      footer: TextButton(
+        onPressed: auth.isLoading
+            ? null
+            : () => Navigator.pushNamed(context, SignupScreen.route),
+        child: const Text('New user? Create account'),
+      ),
+      child: Form(
+        key: _formKey,
         child: Column(
           children: [
-            TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
-            const SizedBox(height: 12),
-            TextField(
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                prefixIcon: Icon(Icons.mail_outline_rounded),
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Email is required';
+                }
+                if (!value.contains('@')) {
+                  return 'Enter a valid email';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 14),
+            TextFormField(
               controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                suffixIcon: IconButton(
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_rounded
+                        : Icons.visibility_off_rounded,
+                  ),
+                ),
+                border: const OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Password is required';
+                }
+                if (value.length < 8) {
+                  return 'Minimum 8 characters required';
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 16),
-            if (auth.isLoading) const LoadingIndicator(),
             if (auth.error != null) ErrorMessage(message: auth.error!),
-            ElevatedButton(onPressed: auth.isLoading ? null : _login, child: const Text('Login')),
-            TextButton(
-              onPressed: () => Navigator.pushNamed(context, SignupScreen.route),
-              child: const Text('Create account'),
-            )
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: auth.isLoading ? null : _login,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  child: auth.isLoading
+                      ? const SizedBox(
+                          key: ValueKey('login-loading'),
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2.4),
+                        )
+                      : const Text(
+                          'Login',
+                          key: ValueKey('login-text'),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+

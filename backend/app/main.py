@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app import models  # noqa: F401
 from app.config import settings
@@ -14,6 +15,14 @@ from app.routers.user_router import router as user_router
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title=settings.APP_NAME)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS if settings.CORS_ORIGINS else ["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth_router)
 app.include_router(user_router)
